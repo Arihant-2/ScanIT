@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <p>Enter a URL and subject below to generate its QR code:</p>
+        <input type="text" id="subject" placeholder="Enter Subject">
+        <input type="text" id="url" placeholder="Enter URL">
+        <button onclick="generateQRCode()">Generate QR Code</button>
+        <button onclick="downloadQRCode()">Download QR Code</button>
+        <div id="qrcode"></div>
+    </div>
+
+    <script>
+        let generatedCanvas = null; // To store the generated canvas
+
+        function generateQRCode() {
+            const url = document.getElementById('url').value;
+            const subject = document.getElementById('subject').value;
+            const qrcodeDiv = document.getElementById('qrcode');
+
+            // Clear any previous QR code
+            qrcodeDiv.innerHTML = '';
+            generatedCanvas = null;
+
+            if (!url.trim()) {
+                alert('Please enter a valid URL!');
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            // Generate QR code on the canvas
+            QRCode.toCanvas(url, { width: 250 }, function (error, qrCanvas) {
+                if (error) {
+                    console.error('Error generating QR code:', error);
+                    alert('Failed to generate QR code. Please try again.');
+                    return;
+                }
+
+                // Add subject text above QR code
+                canvas.width = 250;
+                canvas.height = 300; // Extra space for subject text
+                context.fillStyle = '#fff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = '#000';
+                context.font = '16px Arial';
+                context.textAlign = 'center';
+                context.fillText(subject || 'QR Code', canvas.width / 2, 30);
+                context.drawImage(qrCanvas, 0, 50);
+
+                qrcodeDiv.appendChild(canvas);
+                generatedCanvas = canvas; // Store for downloading
+            });
+        }
+
+        function downloadQRCode() {
+            if (!generatedCanvas) {
+                alert('Please generate a QR code first!');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = generatedCanvas.toDataURL('image/png');
+            link.download = 'qr_code.png';
+            link.click();
+        }
+    </script>
+</body>
+</html>
